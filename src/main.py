@@ -1,12 +1,19 @@
 # scrap the data from sky-map
 # categorize by constellations (caching stars from current constellation)
-# find pattern with some star, from which star's pos can be found (sphere coordinate system)
+# find pattern from which star's pos can be found (sphere coordinate system)
 # if i have one pos, then i can search for other stars (brighter spots on frame with certain characterictics)
 
-# i can also take pos of device and current time/date
+# maybe i can calc pos of star with my iphone pos and iphone's compass direction
+# if i have a star pos, then i can search for this pos in db
 
-import pygame
+# pos of device and current time/date
+
+import os
 import subprocess
+
+import cv2
+import numpy
+import pygame
 
 
 WIDTH, HEIGHT = 1920 // 2, 1080 // 2
@@ -35,6 +42,7 @@ class Video(pygame.sprite.Sprite):
         self.bytes_per_frame = rect.width * rect.height * 3
         self.proc = subprocess.Popen(cmd, stdout=subprocess.PIPE, bufsize=self.bytes_per_frame * 3)
         self.image = pygame.Surface((rect.width, rect.height), pygame.HWSURFACE)
+        self.k = 0
         self.rect = self.image.get_rect()
         self.rect.x = rect.x
         self.rect.y = rect.y
@@ -50,6 +58,11 @@ class Video(pygame.sprite.Sprite):
                 try:
                     raw_img = self.proc.stdout.read(self.bytes_per_frame)
                     self.image = pygame.image.frombuffer(raw_img, (self.rect.width, self.rect.height), "RGB")
+                    # view = pygame.surfarray.array3d(self.image)
+                    # view = view.transpose([1, 0, 2])
+                    # proc_image = cv2.cvtColor(view, cv2.COLOR_RGB2GRAY)
+                    # cv2.imwrite(f"frames/frame_{self.k}.jpg", proc_image)
+                    self.k += 1
                 except:
                     self.image = pygame.Surface((self.rect.width, self.rect.height), pygame.HWSURFACE)
                     self.image.fill((0, 0, 0))
@@ -71,24 +84,60 @@ def run():
 
     is_running = True
     clock = pygame.time.Clock()
-    while is_running:
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT: is_running = False
+    try:
+        while is_running:
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT: is_running = False
 
-        group.update()
-        window.fill((0, 0, 0))
-        group.draw(window)
+            group.update()
+            window.fill((0, 0, 0))
+            group.draw(window)
 
-        pygame.draw.lines(video.image, (197, 0, 60), False, [(600, 200), (660, 200), (600, 200), (600, 220)])
-        pygame.draw.lines(video.image, (197, 0, 60), False, [(600, 220), (660, 220), (660, 200), (660, 220)])
+            image = pygame.surfarray.array3d(video.image)
+            image = image.transpose([1, 0, 2])
+            rimage = cv2.cvtColor(image, cv2.COLOR_RGB2BGR)
+            gimage = cv2.cvtColor(rimage, cv2.COLOR_RGB2GRAY)
 
-        pygame.draw.rect(window, (197, 0, 60), rect, 1)
-        window.blit(text, text_rect.topleft)
+            th, bimage = cv2.threshold(gimage, 145, 255, cv2.THRESH_BINARY)
+            cunts = cv2.findContours(bimage, cv2.RETR_LIST, cv2.CHAIN_APPROX_SIMPLE)[-2]
 
-        pygame.display.flip()
-        clock.tick_busy_loop(30)
+            # lights = [c for c in cunts if 0 < cv2.contourArea(c) < 40]
+            # print(f"lights={len(lights)}")
+
+            moments = [cv2.moments(c) for c in cunts]
+            cents = [(int(m["m10"] / m["m00"]), int(m["m01"] / m["m00"])) for m in moments if m["m00"] != 0]
+
+            for c in cents:
+                pygame.draw.circle(video.image, (197, 0, 60), c, 5, 1)
+                cv2.circle(rimage, c, 5, (60, 0, 197))
+                # cv2.circle(gimage, c, 5, (60, 0, 197))
+                # cv2.circle(bimage, c, 5, (60, 0, 197))
+
+            # if video.k == 100:
+            #     cv2.imwrite(f"frames/frame_{video.k}.jpg", rimage)
+            #     # cv2.imwrite(f"frames/frame_g{video.k}.jpg", gimage)
+            #     # cv2.imwrite(f"frames/frame_b{video.k}.jpg", bimage)
+            #     break
+
+            # pygame.draw.lines(video.image, (197, 0, 60), False, [(600, 200), (660, 200), (600, 200), (600, 220)])
+            # pygame.draw.lines(video.image, (197, 0, 60), False, [(600, 220), (660, 220), (660, 200), (660, 220)])
+
+            # pygame.draw.rect(window, (197, 0, 60), rect, 1)
+            # window.blit(text, text_rect.topleft)
+
+            pygame.display.flip()
+            clock.tick_busy_loop(30)
+    except KeyboardInterrupt:
+        pass
 
     pygame.quit()
+    # del_frames()
+
+
+def del_frames():
+    for file in os.listdir("frames"):
+        path = os.path.join("frames/", file)
+        os.remove(path)
 
 
 if __name__ == "__main__":
