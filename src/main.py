@@ -16,7 +16,8 @@ import numpy
 import pygame
 
 
-WIDTH, HEIGHT = 1920 // 2, 1080 // 2
+# WIDTH, HEIGHT = 1920 // 2, 1080 // 2
+WIDTH, HEIGHT = 1080 // 2, 1920 // 2
 SURFACE = pygame.HWSURFACE | pygame.DOUBLEBUF | pygame.RESIZABLE
 
 pygame.init()
@@ -69,6 +70,10 @@ class Video(pygame.sprite.Sprite):
                     self.is_video_stopped = True
 
 
+def draw_on_frame(poss):
+    pass
+
+
 def run():
     video = Video("5939440-hd_1920_1080_30fps.mp4", pygame.Rect(0, 0, WIDTH, HEIGHT))
     group = pygame.sprite.Group()
@@ -96,28 +101,33 @@ def run():
             image = pygame.surfarray.array3d(video.image)
             image = image.transpose([1, 0, 2])
             rimage = cv2.cvtColor(image, cv2.COLOR_RGB2BGR)
-            gimage = cv2.cvtColor(rimage, cv2.COLOR_RGB2GRAY)
+            gimage = cv2.cvtColor(rimage, cv2.COLOR_BGR2GRAY)
 
-            th, bimage = cv2.threshold(gimage, 145, 255, cv2.THRESH_BINARY)
+            # th, bimage = cv2.threshold(gimage, 140, 255, cv2.THRESH_TOZERO_INV)
+            bimage = cv2.adaptiveThreshold(gimage, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY_INV, 15, 4)
             cunts = cv2.findContours(bimage, cv2.RETR_LIST, cv2.CHAIN_APPROX_SIMPLE)[-2]
 
-            # lights = [c for c in cunts if 0 < cv2.contourArea(c) < 40]
+            cunts = [c for c in cunts if 15 < cv2.contourArea(c) < 40]
             # print(f"lights={len(lights)}")
 
             moments = [cv2.moments(c) for c in cunts]
-            cents = [(int(m["m10"] / m["m00"]), int(m["m01"] / m["m00"])) for m in moments if m["m00"] != 0]
+            cents = [(int(m["m10"] / (m["m00"] + 1e-5)), int(m["m01"] / (m["m00"] + 1e-5))) for m in moments] # (x, y) pos
 
             for c in cents:
                 pygame.draw.circle(video.image, (197, 0, 60), c, 5, 1)
+                # cv2.rectangle(rimage, (c[0] - 2, c[1] - 2), (c[0] + 5, c[1] + 5), (60, 0, 197), 1)
                 cv2.circle(rimage, c, 5, (60, 0, 197))
+                cv2.rectangle(rimage, (c[0] - 105, c[1] - 20), (c[0] - 20, c[1]), (0, 255, 0), 1)
+                cv2.line(rimage, (c[0] - 20, c[1] - 6), (c[0], c[1]), (0, 255, 0), 1)
+                cv2.putText(rimage, "SIRIUS", (c[0] - 100, c[1] - 6), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 1)
                 # cv2.circle(gimage, c, 5, (60, 0, 197))
                 # cv2.circle(bimage, c, 5, (60, 0, 197))
 
-            # if video.k == 100:
-            #     cv2.imwrite(f"frames/frame_{video.k}.jpg", rimage)
-            #     # cv2.imwrite(f"frames/frame_g{video.k}.jpg", gimage)
-            #     # cv2.imwrite(f"frames/frame_b{video.k}.jpg", bimage)
-            #     break
+            if video.k == 2:
+                cv2.imwrite(f"frames/frame_{video.k}.jpg", rimage)
+                cv2.imwrite(f"frames/frame_g{video.k}.jpg", gimage)
+                cv2.imwrite(f"frames/frame_b{video.k}.jpg", bimage)
+                # break
 
             # pygame.draw.lines(video.image, (197, 0, 60), False, [(600, 200), (660, 200), (600, 200), (600, 220)])
             # pygame.draw.lines(video.image, (197, 0, 60), False, [(600, 220), (660, 220), (660, 200), (660, 220)])
