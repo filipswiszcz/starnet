@@ -17,12 +17,13 @@ import pygame
 
 
 # WIDTH, HEIGHT = 1920 // 2, 1080 // 2
-WIDTH, HEIGHT = 1080 // 2, 1920 // 2
+# WIDTH, HEIGHT = 1080, 1920
+WIDTH, HEIGHT = 1920, 1080
 SURFACE = pygame.HWSURFACE | pygame.DOUBLEBUF | pygame.RESIZABLE
 
 pygame.init()
 pygame.mixer.init()
-window = pygame.display.set_mode((WIDTH, HEIGHT), SURFACE)
+window = pygame.display.set_mode((HEIGHT // 2, WIDTH // 2), SURFACE)
 pygame.display.set_caption("Powered by XYCORP Labs")
 
 
@@ -70,8 +71,10 @@ class Video(pygame.sprite.Sprite):
                     self.is_video_stopped = True
 
 
-def draw_on_frame(poss):
-    pass
+def draw_box(frame, text, pos): # (60, 0, 197)
+    cv2.rectangle(frame, (pos[0] - 105, pos[1] - 20), (pos[0] - 20, pos[1]), (0, 255, 0), 1)
+    cv2.line(frame, (pos[0] - 20, pos[1] - 6), (pos[0] - 3, pos[1]), (0, 255, 0), 1)
+    cv2.putText(frame, text, (pos[0] - 100, pos[1] - 6), cv2.FONT_HERSHEY_SIMPLEX, 0.4, (0, 255, 0), 1)
 
 
 def run():
@@ -107,19 +110,22 @@ def run():
             bimage = cv2.adaptiveThreshold(gimage, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY_INV, 15, 4)
             cunts = cv2.findContours(bimage, cv2.RETR_LIST, cv2.CHAIN_APPROX_SIMPLE)[-2]
 
-            cunts = [c for c in cunts if 15 < cv2.contourArea(c) < 40]
+            cunts = [c for c in cunts if 15 < cv2.contourArea(c) < 40] # there are probably better values 
             # print(f"lights={len(lights)}")
 
             moments = [cv2.moments(c) for c in cunts]
             cents = [(int(m["m10"] / (m["m00"] + 1e-5)), int(m["m01"] / (m["m00"] + 1e-5))) for m in moments] # (x, y) pos
 
             for c in cents:
-                pygame.draw.circle(video.image, (197, 0, 60), c, 5, 1)
+                draw_box(rimage, "CMa (Sirius)", c)
+                pygame.draw.circle(video.image, (0, 255, 0), c, 5, 1)
+
                 # cv2.rectangle(rimage, (c[0] - 2, c[1] - 2), (c[0] + 5, c[1] + 5), (60, 0, 197), 1)
-                cv2.circle(rimage, c, 5, (60, 0, 197))
-                cv2.rectangle(rimage, (c[0] - 105, c[1] - 20), (c[0] - 20, c[1]), (0, 255, 0), 1)
-                cv2.line(rimage, (c[0] - 20, c[1] - 6), (c[0], c[1]), (0, 255, 0), 1)
-                cv2.putText(rimage, "SIRIUS", (c[0] - 100, c[1] - 6), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 1)
+                # cv2.circle(rimage, c, 5, (60, 0, 197))
+                # cv2.rectangle(rimage, (c[0] - 105, c[1] - 20), (c[0] - 20, c[1]), (0, 255, 0), 1)
+                # cv2.line(rimage, (c[0] - 20, c[1] - 6), (c[0], c[1]), (0, 255, 0), 1)
+                # cv2.putText(rimage, "SIRIUS", (c[0] - 100, c[1] - 6), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 1)
+
                 # cv2.circle(gimage, c, 5, (60, 0, 197))
                 # cv2.circle(bimage, c, 5, (60, 0, 197))
 
