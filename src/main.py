@@ -110,13 +110,14 @@ def run():
             bimage = cv2.adaptiveThreshold(gimage, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY_INV, 15, 4)
             cunts = cv2.findContours(bimage, cv2.RETR_LIST, cv2.CHAIN_APPROX_SIMPLE)[-2]
 
-            cunts = [c for c in cunts if 15 < cv2.contourArea(c) < 40] # there are probably better values 
+            cunts = [c for c in cunts if 20 < cv2.contourArea(c) < 60] # there are probably better values 
             # print(f"lights={len(lights)}")
 
             moments = [cv2.moments(c) for c in cunts]
             cents = [(int(m["m10"] / (m["m00"] + 1e-5)), int(m["m01"] / (m["m00"] + 1e-5))) for m in moments] # (x, y) pos
 
             for c in cents:
+                # localize cent
                 draw_box(rimage, "CMa (Sirius)", c)
                 pygame.draw.circle(video.image, (0, 255, 0), c, 5, 1)
 
@@ -135,19 +136,12 @@ def run():
                 cv2.imwrite(f"frames/frame_b{video.k}.jpg", bimage)
                 # break
 
-            # pygame.draw.lines(video.image, (197, 0, 60), False, [(600, 200), (660, 200), (600, 200), (600, 220)])
-            # pygame.draw.lines(video.image, (197, 0, 60), False, [(600, 220), (660, 220), (660, 200), (660, 220)])
-
-            # pygame.draw.rect(window, (197, 0, 60), rect, 1)
-            # window.blit(text, text_rect.topleft)
-
             pygame.display.flip()
             clock.tick_busy_loop(30)
     except KeyboardInterrupt:
         pass
 
     pygame.quit()
-    # del_frames()
 
 
 def del_frames():
