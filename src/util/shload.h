@@ -9,7 +9,7 @@
 #endif
 #include <GLFW/glfw3.h>
 
-void rfile(char *shader, char *filepath) {
+void shread(char *filepath, char **shader) {
     FILE *file = fopen(filepath, "r");
     if (file == NULL) {
         printf("Failed to open file"); return;
@@ -23,27 +23,43 @@ void rfile(char *shader, char *filepath) {
     fread(cont, 1, fsize, file);
     cont[fsize] = '\0';
 
-    shader = strdup(cont);
+    *shader = strdup(cont);
 
     free(cont);
     fclose(file);
 }
 
-uint32_t shcompile(char* code, uint32_t type) {
+uint32_t shcompile(uint32_t type, char *code) {
     uint32_t shader = glCreateShader(type);
-    const char* src = code;
+    const char *ccode = code;
 
-    glShaderSource(shader, 1, &src, NULL);
+    glShaderSource(shader, 1, &ccode, NULL);
     glCompileShader(shader);
 
-    char info[256];
-    GLint status;
+    char info[512];
+    int32_t status;
     glGetShaderiv(shader, GL_COMPILE_STATUS, &status);
     if (status != GL_TRUE) {
-        glGetShaderInfoLog(shader, 256, NULL, info);
+        glGetShaderInfoLog(shader, 512, NULL, info);
+        printf("Shader did not compile: %s", info); return -1;
     }
 
     return shader;
 }
 
-uint32_t shlink(uint32_t vsh, uint32_t fsh) {}
+uint32_t shlink(uint32_t vshader, uint32_t fshader) {
+    uint32_t prog = glCreateProgram();
+    glAttachShader(prog, vshader);
+    glAttachShader(prog, fshader);
+    glLinkProgram(prog);
+
+    char info[512];
+    int32_t status;
+    glGetProgramiv(prog, GL_LINK_STATUS, &status);
+    if (status != GL_TRUE) {
+        glGetProgramInfoLog(prog, 512, NULL, info);
+        printf("Shader did not link: %s", info); return -1;
+    }
+
+    return prog;
+}
