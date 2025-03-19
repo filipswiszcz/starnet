@@ -4,6 +4,7 @@
 #include <stdbool.h>
 #include <ctype.h>
 
+#include "util/res_load.h"
 #include "util/shload.h"
 #include "context.h"
 
@@ -60,6 +61,11 @@ int main() {
     // glBindVertexArray(0);
     // glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
     // glBindBuffer(GL_ARRAY_BUFFER, 0);
+
+    // TODO
+    // render a lot of meshes and later a lot of instances, check performances (does it really fucking works?)
+    // mesh_t mesh;
+    // mesh_load(&mesh, "assets/default/cube.obj");
 
     mat4 projection = perspective(radians(45.0f), (float) WINDOW_WIDTH / (float) WINDOW_HEIGHT, 0.1f, 100.0f);
     glUniformMatrix4fv(glGetUniformLocation(prog, "projection"), 1, GL_FALSE, &projection.m[0][0]);

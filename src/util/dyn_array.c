@@ -1,19 +1,4 @@
-#include <stdlib.h>
-
-typedef struct farray farray_t;
-typedef struct iarray iarray_t;
-
-struct farray {
-    float *values;
-    size_t k;
-    size_t capacity;
-};
-
-struct iarray {
-    int *values;
-    size_t k;
-    size_t capacity;
-};
+#include "util/dyn_array.h"
 
 void farray_add(farray_t *arr, float val) {
     do {

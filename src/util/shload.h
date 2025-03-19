@@ -1,3 +1,6 @@
+#ifndef SHADER_LOAD_H
+#define SHADER_LOAD_H
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdint.h>
@@ -63,3 +66,5 @@ uint32_t shlink(uint32_t vshader, uint32_t fshader) {
 
     return prog;
 }
+
+#endif

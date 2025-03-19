@@ -1,3 +1,6 @@
+#ifndef CONTEXT_H
+#define CONTEXT_H
+
 #include <math.h>
 #ifdef __APPLE__
     #define GL_SILENCE_DEPRECATION
@@ -6,6 +9,8 @@
 #include <GLFW/glfw3.h>
 
 #include "util/matrix.h"
+
+// xycida
 
 static struct {
     GLFWwindow *window;
@@ -16,4 +21,23 @@ static struct {
         float yaw, pitch;
     } camera;
 
+    // viewer
+        // speed of movement, distances to other objects
+        // camera attached to viewer
+
+    // renderer
+        // scenes
+            // objects
+                // things
+                    // meshes, textures, colors
+                    // other properties (weight, size)
+                // characters
+                    // bones
+                    // draw
+                // particles
+                    // sim
+                    // draw
+
 } context;
+
+#endif /* CONTEXT_H */
