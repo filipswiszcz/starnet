@@ -6,6 +6,8 @@
 #include "util/dyn_array.h"
 #include "util/vector.h"
 
+typedef struct material material_t;
+
 struct material {
     char *name;
     float shininess;
@@ -20,7 +22,7 @@ struct mesh {
     uint16_t id;
     farray_t vertices;
     iarray_t indices;
-    struct material material;
+    material_t material;
 };
 
 struct {

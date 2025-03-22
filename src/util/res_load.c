@@ -13,7 +13,7 @@ void mesh_load(mesh_t *mesh, const char *filepath) {
             farray_add(&mesh -> vertices, y);
             farray_add(&mesh -> vertices, z);
         } else if (strncmp(ln, "f", 1) == 0) {
-            
+            _mesh_get_indices(&mesh -> indices, ln);
         } else if (strncmp(ln, "mtllib", 6) == 0) {
 
         }
@@ -21,3 +21,22 @@ void mesh_load(mesh_t *mesh, const char *filepath) {
 
     fclose(file);
 }
+
+void _mesh_get_indices(iarray_t *arr, char ln[64]) {
+    int g = 0, c = 0;
+    for (int i = 0; i < 64; i++) {
+        if (ln[i] == '/' && g == 0) g = 1;
+        else if (ln[i] == '/' && g == 1) {
+            int l = (i + c) - i;
+            char *sub = (char*) malloc(l + 1);
+            strncpy(sub, &ln[i - c], l);
+            sub[l] = '\0';
+            uint32_t val = strtoul(sub, NULL, 0);
+            iarray_add(arr, val);
+            free(sub);
+            g = 0; c = 0;
+        } else if (g == 1) c += 1;
+    }
+}
+
+void _mesh_get_material(material_t material, const char *filepath) {}
