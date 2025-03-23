@@ -15,7 +15,9 @@ void mesh_load(mesh_t *mesh, const char *filepath) {
         } else if (strncmp(ln, "f", 1) == 0) {
             _mesh_get_indices(&mesh -> indices, ln);
         } else if (strncmp(ln, "mtllib", 6) == 0) {
-
+            char path[256];
+            sscanf(ln, "mtllib %s", path);
+            _mesh_get_material(mesh -> material, path);
         }
     }
 
@@ -39,4 +41,18 @@ void _mesh_get_indices(iarray_t *arr, char ln[64]) {
     }
 }
 
-void _mesh_get_material(material_t material, const char *filepath) {}
+void _mesh_get_material(material_t material, const char *filepath) {
+    FILE *file = fopen(filepath, "r");
+    // assert
+
+    char ln[64];
+    while (fgets(ln, sizeof(ln), file)) {
+        if (strncmp(ln, "Ns", 2) == 0) {
+            sscanf(ln, "Ns %f", &material.shininess);
+        } else if (strncmp(ln, "Ka", 2) == 0) {
+            sscanf(ln, "Ka %f %f %f", &material.ambient.x, &material.ambient.y, &material.ambient.z);
+        }
+
+    }
+    fclose(file);
+}
