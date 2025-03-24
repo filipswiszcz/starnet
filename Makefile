@@ -1,5 +1,5 @@
 CC = clang
-CFLAGS = -std=c99 -I./src -I./src/object -I./src/util
+CFLAGS = -std=c99 -I./src -I./src/object -I./src/util -I./src/util/math
 LDFLAGS = -Llib -lglfw -framework Cocoa -framework OpenGL -framework IOKit
 
 BUILD_DIR = build
@@ -9,7 +9,7 @@ LIB_DIR = lib
 $(BUILD_DIR):
 	mkdir -p $(BUILD_DIR)
 
-SRCS := $(wildcard $(SRC_DIR)/**/*.c $(SRC_DIR)/*.c)
+SRCS := $(wildcard $(SRC_DIR)/**/**/*.c $(SRC_DIR)/**/*.c $(SRC_DIR)/*.c)
 OBJS := $(patsubst $(SRC_DIR)/%.c, $(BUILD_DIR)/%.o, $(SRCS))
 TARGET = $(BUILD_DIR)/starnet
 

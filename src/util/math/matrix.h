@@ -1,7 +1,7 @@
 #ifndef MATRIX_H
 #define MATRIX_H
 
-#include "vector.h"
+#include "util/math/vector.h"
 
 #define mat4(v) ((mat4) {v})
 
@@ -54,4 +54,4 @@ mat4 get_look_at(vec3 pos, vec3 targpos, vec3 uppos) {
     return res;
 }
 
-#endif
+#endif /* MATRIX_H */

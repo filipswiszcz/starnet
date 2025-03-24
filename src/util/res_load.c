@@ -15,12 +15,13 @@ void mesh_load(mesh_t *mesh, const char *filepath) {
         } else if (strncmp(ln, "f", 1) == 0) {
             _mesh_get_indices(&mesh -> indices, ln);
         } else if (strncmp(ln, "mtllib", 6) == 0) {
-            char path[256];
+            char prepath[256], path[128];
             sscanf(ln, "mtllib %s", path);
-            _mesh_get_material(mesh -> material, path);
+            strcpy(prepath, ASSETS_DEFAULT_DIR_PATH);
+            strcat(prepath, path);
+            _mesh_get_material(mesh -> material, prepath);
         }
     }
-
     fclose(file);
 }
 
@@ -43,7 +44,11 @@ void _mesh_get_indices(iarray_t *arr, char ln[64]) {
 
 void _mesh_get_material(material_t material, const char *filepath) {
     FILE *file = fopen(filepath, "r");
+    
     // assert
+    if (file == NULL) {
+        printf("no file"); return;
+    }
 
     char ln[64];
     while (fgets(ln, sizeof(ln), file)) {
@@ -51,8 +56,19 @@ void _mesh_get_material(material_t material, const char *filepath) {
             sscanf(ln, "Ns %f", &material.shininess);
         } else if (strncmp(ln, "Ka", 2) == 0) {
             sscanf(ln, "Ka %f %f %f", &material.ambient.x, &material.ambient.y, &material.ambient.z);
+        } else if (strncmp(ln, "Kd", 2) == 0) {
+            sscanf(ln, "Kd %f %f %f", &material.diffuse.x, &material.diffuse.y, &material.diffuse.z);
+        } else if (strncmp(ln, "Ks", 2) == 0) {
+            sscanf(ln, "Ks %f %f %f", &material.specular.x, &material.specular.y, &material.specular.z);
+        } else if (strncmp(ln, "Ke", 2) == 0) {
+            sscanf(ln, "Ke %f %f %f", &material.emissibity.x, &material.emissibity.y, &material.emissibity.z);
+        } else if (strncmp(ln, "Ni", 2) == 0) {
+            sscanf(ln, "Ni %f", &material.density);
+        } else if (strncmp(ln, "d", 1) == 0) {
+            sscanf(ln, "d %f", &material.transparency);
+        } else if (strncmp(ln, "illum", 5) == 0) {
+            sscanf(ln, "illum %d", &material.illumination);
         }
-
     }
     fclose(file);
 }

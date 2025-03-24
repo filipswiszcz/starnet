@@ -1,4 +1,4 @@
-#include "util/vector.h"
+#include "util/math/vector.h"
 
 float radians(float degrees) {
     return degrees * 0.01745329251994329576923690768489;

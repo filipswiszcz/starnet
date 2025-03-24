@@ -8,7 +8,7 @@
 #endif
 #include <GLFW/glfw3.h>
 
-#include "util/matrix.h"
+#include "util/math/matrix.h"
 
 // xycida
 

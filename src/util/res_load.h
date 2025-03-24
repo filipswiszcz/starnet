@@ -8,6 +8,8 @@
 
 #include "object/mesh.h"
 
+#define ASSETS_DEFAULT_DIR_PATH "assets/default/"
+
 void mesh_load(mesh_t *mesh, const char *filepath);
 
 void _mesh_get_indices(iarray_t *arr, char ln[64]);
