@@ -8,12 +8,34 @@
 #include "util/shload.h"
 #include "context.h"
 
-#define ASSERT(_e, ...) if (!(_e)) {fprintf(stderr, __VA_ARGS__); exit(1);}
-
 #define WINDOW_WIDTH 800
 #define WINDOW_HEIGHT 600
 
 #define WINDOW_NAME "STARNET (BUILD v0.0.2) - Powered by XYCORP Labs"
+
+int IS_FIRST_PLAY = 1;
+
+void mouse_input(GLFWwindow *window) {
+    double mouse_x, mouse_y;
+    glfwGetCursorPos(context.window, &mouse_x, &mouse_y);
+
+    if (IS_FIRST_PLAY) {
+        // set mouse x
+        // set mouse y
+        IS_FIRST_PLAY = 0;
+    }
+
+    float offset_x = mouse_x - context.camera.mouse_x;
+    float offset_y = context.camera.mouse_y - mouse_y;
+
+    context.camera.mouse_x = mouse_x;
+    context.camera.mouse_y = mouse_y;
+
+    offset_x *= context.camera.sensitivity;
+    offset_y *= context.camera.sensitivity;
+
+    
+}
 
 int main() {
     ASSERT(glfwInit(), "Failed to initialize OpenGL");

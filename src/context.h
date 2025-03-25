@@ -18,7 +18,9 @@ static struct {
     struct {
         vec3 pos;
         vec3 targpos, uppos;
+        float mouse_x, mouse_y;
         float yaw, pitch;
+        float speed, sensitivity;
     } camera;
 
     // viewer
