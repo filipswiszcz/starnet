@@ -15,13 +15,21 @@
 
 int IS_FIRST_PLAY = 1;
 
-void mouse_input(GLFWwindow *window) {
+float TIME_OF_LAST_FRAME = 0.0f;
+float TIME_BETWEEN_FRAMES = 0.0f;
+float FRAMES_PER_SECOND = 0.0f;
+int TEMP_FRAMES_HOLDER = 0;
+
+float CAMERA_TIME_BETWEEN_FRAMES = 0.0f;
+float CAMERA_TIME_OF_LAST_FRAME = 0.0f;
+
+void mouse_input() {
     double mouse_x, mouse_y;
     glfwGetCursorPos(context.window, &mouse_x, &mouse_y);
 
     if (IS_FIRST_PLAY) {
-        // set mouse x
-        // set mouse y
+        context.camera.mouse_x = mouse_x;
+        context.camera.mouse_y = mouse_y;
         IS_FIRST_PLAY = 0;
     }
 
@@ -34,7 +42,53 @@ void mouse_input(GLFWwindow *window) {
     offset_x *= context.camera.sensitivity;
     offset_y *= context.camera.sensitivity;
 
-    
+    context.camera.yaw = (context.camera.yaw + offset_x);
+    context.camera.pitch = (context.camera.pitch + offset_y);
+
+    if (context.camera.pitch > 89.0f) context.camera.pitch = 89.0f;
+    if (context.camera.pitch < -89.0f) context.camera.pitch = -89.0f;
+
+    vec3 t = {
+        cos(radians(context.camera.yaw)) * cos(radians(context.camera.pitch)),
+        sin(radians(context.camera.pitch)),
+        sin(radians(context.camera.yaw)) * cos(radians(context.camera.pitch))
+    };
+
+    context.camera.targpos = normalize(t);
+}
+
+void keyboard_input() {
+    if (glfwGetKey(context.window, GLFW_KEY_W) == GLFW_PRESS)
+        context.camera.pos = vec3_add(context.camera.pos, vec3_mul(context.camera.targpos, (context.camera.speed * CAMERA_TIME_BETWEEN_FRAMES)));
+    if (glfwGetKey(context.window, GLFW_KEY_S) == GLFW_PRESS)
+        context.camera.pos = vec3_sub(context.camera.pos, vec3_mul(context.camera.targpos, (context.camera.speed * CAMERA_TIME_BETWEEN_FRAMES)));
+    if (glfwGetKey(context.window, GLFW_KEY_A) == GLFW_PRESS)
+        context.camera.pos = vec3_mul(vec3_sub(context.camera.pos, normalize(cross(context.camera.targpos, context.camera.uppos))), (context.camera.speed * CAMERA_TIME_BETWEEN_FRAMES));
+    if (glfwGetKey(context.window, GLFW_KEY_D) == GLFW_PRESS)
+        context.camera.pos = vec3_mul(vec3_add(context.camera.pos, normalize(cross(context.camera.targpos, context.camera.uppos))), (context.camera.speed * CAMERA_TIME_BETWEEN_FRAMES));
+
+    if (glfwGetKey(context.window, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS)
+        context.camera.speed = 5.0f;
+    if (glfwGetKey(context.window, GLFW_KEY_LEFT_SHIFT) == GLFW_RELEASE)
+        context.camera.speed = 2.0f;
+    if (glfwGetKey(context.window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
+        glfwSetWindowShouldClose(context.window, true);
+}
+
+void frames_updater() {
+    float curr_tm = (float) glfwGetTime();
+    TIME_BETWEEN_FRAMES = curr_tm - TIME_OF_LAST_FRAME;
+    TEMP_FRAMES_HOLDER++;
+    if (TIME_BETWEEN_FRAMES > 1.0) {
+        FRAMES_PER_SECOND = TEMP_FRAMES_HOLDER / TIME_BETWEEN_FRAMES;
+        TEMP_FRAMES_HOLDER = 0;
+        TIME_OF_LAST_FRAME = curr_tm;
+        char fps_title[16], full_title[64];
+        strcpy(full_title, WINDOW_NAME);
+        sprintf(fps_title, " [%d FPS]", (int) FRAMES_PER_SECOND);
+        strcat(full_title, fps_title);
+        glfwSetWindowTitle(context.window, full_title);
+    }
 }
 
 int main() {
@@ -96,10 +150,25 @@ int main() {
     context.camera.pos = vec3(0.0f, 1.0f, 3.0f);
     context.camera.targpos = vec3(0.0f, 0.0f, -1.0f);
     context.camera.uppos = vec3(0.0f, 1.0f, 0.0f);
+    context.camera.yaw = -90.0f;
+    context.camera.pitch = 0.0f;
+    context.camera.speed = 2.0f;
+    context.camera.sensitivity = 0.2f;
     // end of camera
 
     while (!glfwWindowShouldClose(context.window)) {
+        float curr_frame_tm = (double) glfwGetTime();
+        CAMERA_TIME_BETWEEN_FRAMES = curr_frame_tm - CAMERA_TIME_OF_LAST_FRAME;
+        CAMERA_TIME_OF_LAST_FRAME = curr_frame_tm;
 
+        // frames
+        frames_updater();
+
+        // inputs
+        keyboard_input();
+        mouse_input();
+
+        // background
         glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
