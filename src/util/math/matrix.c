@@ -1,20 +1,33 @@
 #include "util/math/matrix.h"
 
+void __mat4_read(mat4 m) {
+    for (int i = 0; i < 4; i++) {
+        printf("[");
+        for (int j = 0; j < 4; j++) {
+            printf("%7.2f", m.m[i][j]);
+            if (j < 3) printf(" ");
+        }
+        printf("]\n");
+    }
+    printf("\n");
+}
+
 mat4 perspective(float fovy, float aspect, float znear, float zfar) {
     float rad = fovy;
     float tan_half_fovy = tan(rad / 2);
 
     mat4 res = mat4(0);
-    res.m[0][0] = 1 / (aspect * tan_half_fovy);
-    res.m[1][1] = 1 / (tan_half_fovy);
+    res.m[0][0] = 1.0f / (aspect * tan_half_fovy);
+    res.m[1][1] = 1.0f / (tan_half_fovy);
     res.m[2][2] = -(zfar + znear) / (zfar - znear);
-    res.m[2][3] = -1;
-    res.m[3][2] = -(2 * zfar * znear);
+    res.m[2][3] = -1.0f;
+    res.m[3][2] = -(2.0f * zfar * znear) / (zfar - znear);
+    res.m[3][3] = 0.0f;
 
     return res;
 }
 
-mat4 translate(mat4 m, vec3 v) {
+mat4 translate(mat4 m, vec3 v) { // res[3][0] += v.x; del [3][3]
     mat4 res = m;
     res.m[3][0] = m.m[0][0] * v.x + m.m[1][0] * v.y + m.m[2][0] * v.z + m.m[3][0];
     res.m[3][1] = m.m[0][1] * v.x + m.m[1][1] * v.y + m.m[2][1] * v.z + m.m[3][1];
@@ -24,9 +37,9 @@ mat4 translate(mat4 m, vec3 v) {
 }
 
 mat4 get_look_at(vec3 pos, vec3 targpos, vec3 uppos) {
-    const vec3 t = normalize(vec3_sub(vec3_add(pos, targpos), pos));
+    const vec3 t = normalize(vec3_sub(targpos, pos));
     const vec3 r = normalize(cross(t, uppos));
-    const vec3 u = cross(r, t);
+    const vec3 u = normalize(cross(r, t));
 
     mat4 res = mat4(1);
     res.m[0][0] = r.x;
@@ -41,6 +54,7 @@ mat4 get_look_at(vec3 pos, vec3 targpos, vec3 uppos) {
     res.m[3][0] = -dot(r, pos);
     res.m[3][1] = -dot(u, pos);
     res.m[3][2] = dot(t, pos);
+    res.m[3][3] = 1.0f;
 
     return res;
 }
