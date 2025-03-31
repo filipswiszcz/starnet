@@ -2,7 +2,8 @@
 
 void mesh_load(mesh_t *mesh, const char *filepath) {
     FILE *file = fopen(filepath, "r");
-    // assert
+
+    ASSERT(file != NULL, "Failed to open the file: %s\n", filepath);
 
     char ln[64];
     while (fgets(ln, sizeof(ln), file)) {
@@ -25,17 +26,17 @@ void mesh_load(mesh_t *mesh, const char *filepath) {
     fclose(file);
 }
 
-void _mesh_get_indices(iarray_t *arr, char ln[64]) {
+void _mesh_get_indices(iarray_t *arr, char ln[64]) { // it is super cool now!
     int g = 0, c = 0;
     for (int i = 0; i < 64; i++) {
-        if (ln[i] == '/' && g == 0) g = 1;
+        if (ln[i] == ' ') g = 1;
         else if (ln[i] == '/' && g == 1) {
             int l = (i + c) - i;
             char *sub = (char*) malloc(l + 1);
             strncpy(sub, &ln[i - c], l);
             sub[l] = '\0';
             uint32_t val = strtoul(sub, NULL, 0);
-            iarray_add(arr, val);
+            iarray_add(arr, val - 1);
             free(sub);
             g = 0; c = 0;
         } else if (g == 1) c += 1;
@@ -45,10 +46,7 @@ void _mesh_get_indices(iarray_t *arr, char ln[64]) {
 void _mesh_get_material(material_t material, const char *filepath) {
     FILE *file = fopen(filepath, "r");
     
-    // assert
-    if (file == NULL) {
-        printf("no file"); return;
-    }
+    ASSERT(file != NULL, "Failed to get the file's material: %s\n", filepath);
 
     char ln[64];
     while (fgets(ln, sizeof(ln), file)) {
@@ -71,4 +69,40 @@ void _mesh_get_material(material_t material, const char *filepath) {
         }
     }
     fclose(file);
+}
+
+void texture_load(uint32_t texture, const char *filepath) {
+    glGenTextures(1, &texture);
+    glBindTexture(GL_TEXTURE_2D, texture);
+
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+    int w, h, c;
+    unsigned char *img = stbi_load(filepath, &w, &h, &c, 0);
+    ASSERT(img, "Failed to load texture");
+
+    int frmt, ifrmt;
+    switch (c) {
+        case 1:
+            frmt = GL_RED;
+            ifrmt = GL_RED;
+            break;
+        case 3:
+            frmt = GL_RGB;
+            ifrmt = GL_RGB;
+            break;
+        case 4:
+            frmt = GL_RGBA;
+            ifrmt = GL_RGBA;
+            break;
+    }
+
+    glTexImage2D(GL_TEXTURE_2D, 0, ifrmt, w, h, 0, frmt, GL_UNSIGNED_BYTE, img);
+    glGenerateMipmap(GL_TEXTURE_2D);
+
+    stbi_image_free(img);
 }
