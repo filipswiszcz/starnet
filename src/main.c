@@ -11,7 +11,7 @@
 #define WINDOW_WIDTH 800
 #define WINDOW_HEIGHT 600
 
-#define WINDOW_NAME "STARNET (BUILD v0.0.2) - Powered by XYCORP Labs"
+#define WINDOW_NAME "STARNET (BUILD v0.0.5) - Powered by XYCORP Labs"
 
 int IS_FIRST_PLAY = 1;
 
@@ -63,10 +63,9 @@ void keyboard_input() {
     if (glfwGetKey(context.window, GLFW_KEY_S) == GLFW_PRESS)
         context.camera.pos = vec3_sub(context.camera.pos, vec3_mul(context.camera.targpos, (context.camera.speed * CAMERA_TIME_BETWEEN_FRAMES)));
     if (glfwGetKey(context.window, GLFW_KEY_A) == GLFW_PRESS)
-        context.camera.pos = vec3_mul(vec3_sub(context.camera.pos, normalize(cross(context.camera.targpos, context.camera.uppos))), (context.camera.speed * CAMERA_TIME_BETWEEN_FRAMES));
+        context.camera.pos = vec3_sub(context.camera.pos, vec3_mul(normalize(cross(context.camera.targpos, context.camera.uppos)), context.camera.speed * CAMERA_TIME_BETWEEN_FRAMES));
     if (glfwGetKey(context.window, GLFW_KEY_D) == GLFW_PRESS)
-        context.camera.pos = vec3_mul(vec3_add(context.camera.pos, normalize(cross(context.camera.targpos, context.camera.uppos))), (context.camera.speed * CAMERA_TIME_BETWEEN_FRAMES));
-
+        context.camera.pos = vec3_add(context.camera.pos, vec3_mul(normalize(cross(context.camera.targpos, context.camera.uppos)), context.camera.speed * CAMERA_TIME_BETWEEN_FRAMES));
     if (glfwGetKey(context.window, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS)
         context.camera.speed = 5.0f;
     if (glfwGetKey(context.window, GLFW_KEY_LEFT_SHIFT) == GLFW_RELEASE)
@@ -106,9 +105,9 @@ int main() {
     glfwSetInputMode(context.window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 
     glEnable(GL_DEPTH_TEST);
+    // glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 
     // shaders
-
     char *vshcode, *fshcode;
     shread("shader/basic.vs", &vshcode);
     shread("shader/basic.fs", &fshcode);
@@ -117,34 +116,34 @@ int main() {
     uint32_t fshader = shcompile(GL_FRAGMENT_SHADER, fshcode);
 
     uint32_t prog = shlink(vshader, fshader);
-
     // end of shaders
-
-    // unsigned int vao, vbo;
-    // glGenVertexArrays(1, &vao);
-    // glGenBuffers(1, &vbo);
-
-    // glBindVertexArray(vao);
-    
-    // glBindBuffer(GL_ARRAY_BUFFER, vbo);
-    // glBufferData(GL_ARRAY_BUFFER, sizeof vertices, vertices, GL_STATIC_DRAW);
-
-    // glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*) 0);
-    // glEnableVertexAttribArray(0);
-    // glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*) (3 * sizeof(float)));
-    // glEnableVertexAttribArray(1);
-
-    // glBindVertexArray(0);
-    // glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
-    // glBindBuffer(GL_ARRAY_BUFFER, 0);
 
     // TODO
     // render a lot of meshes and later a lot of instances, check performances (does it really fucking works?)
     mesh_t mesh = {0};
     mesh_load(&mesh, "assets/default/cube.obj");
 
-    mat4 projection = perspective(radians(45.0f), (float) WINDOW_WIDTH / (float) WINDOW_HEIGHT, 0.1f, 100.0f);
-    glUniformMatrix4fv(glGetUniformLocation(prog, "projection"), 1, GL_FALSE, &projection.m[0][0]);
+    unsigned int vao, vbo, ebo;
+    glGenVertexArrays(1, &vao);
+    glGenBuffers(1, &vbo);
+    glGenBuffers(1, &ebo);
+
+    glBindVertexArray(vao);
+    
+    glBindBuffer(GL_ARRAY_BUFFER, vbo);
+    glBufferData(GL_ARRAY_BUFFER, mesh.vertices.k * sizeof(float), mesh.vertices.values, GL_STATIC_DRAW);
+
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, mesh.indices.k * sizeof(uint32_t), mesh.indices.values, GL_STATIC_DRAW);
+
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*) 0);
+    glEnableVertexAttribArray(0);
+    // glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*) (3 * sizeof(float)));
+    // glEnableVertexAttribArray(2);
+
+    // glBindVertexArray(0);
+    // glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+    // glBindBuffer(GL_ARRAY_BUFFER, 0);
 
     // camera
     context.camera.pos = vec3(0.0f, 1.0f, 3.0f);
@@ -174,21 +173,27 @@ int main() {
 
         glUseProgram(prog);
 
+        mat4 projection = perspective(radians(45.0f), (float) WINDOW_WIDTH / (float) WINDOW_HEIGHT, 0.1f, 100.0f);
+        glUniformMatrix4fv(glGetUniformLocation(prog, "projection"), 1, GL_FALSE, &projection.m[0][0]);
+
         mat4 view = get_look_at(context.camera.pos, vec3_add(context.camera.pos, context.camera.targpos), context.camera.uppos);
         glUniformMatrix4fv(glGetUniformLocation(prog, "view"), 1, GL_FALSE, &view.m[0][0]);
-
-        // glBindVertexArray(vao);
         
         mat4 model = mat4(1.0f);
         // model = translate(model, positions[1]);
         glUniformMatrix4fv(glGetUniformLocation(prog, "model"), 1, GL_FALSE, &model.m[0][0]);
 
+        glBindVertexArray(vao);
+        // glDrawArrays(GL_TRIANGLES, 0, 36);
+        glDrawElements(GL_TRIANGLES, mesh.indices.k, GL_UNSIGNED_INT, 0);
+
         glfwSwapBuffers(context.window);
         glfwPollEvents();
     }
 
-    // glDeleteVertexArrays(1, &vao);
-    // glDeleteBuffers(1, &vbo);
+    glDeleteVertexArrays(1, &vao);
+    glDeleteBuffers(1, &vbo);
+    glDeleteBuffers(1, &ebo);
     glDeleteProgram(prog);
     glfwTerminate();
 
