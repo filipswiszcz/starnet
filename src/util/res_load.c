@@ -1,3 +1,6 @@
+#define STB_IMAGE_IMPLEMENTATION
+#include <stb/stb_image.h>
+
 #include "util/res_load.h"
 
 void mesh_load(mesh_t *mesh, const char *filepath) {
@@ -13,6 +16,9 @@ void mesh_load(mesh_t *mesh, const char *filepath) {
             farray_add(&mesh -> vertices, x);
             farray_add(&mesh -> vertices, y);
             farray_add(&mesh -> vertices, z);
+        } else if (strncmp(ln, "vt", 2) == 0) {
+            float u, v;
+            sscanf(ln, "vt %f %f", &u, &v);
         } else if (strncmp(ln, "f", 1) == 0) {
             _mesh_get_indices(&mesh -> indices, ln);
         } else if (strncmp(ln, "mtllib", 6) == 0) {

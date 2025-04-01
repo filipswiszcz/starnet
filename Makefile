@@ -1,5 +1,5 @@
 CC = clang
-CFLAGS = -std=c99 -I./src -I./src/object -I./src/util -I./src/util/math
+CFLAGS = -std=c99 -I./lib -I./src -I./src/object -I./src/util -I./src/util/math
 LDFLAGS = -Llib -lglfw -framework Cocoa -framework OpenGL -framework IOKit
 
 BUILD_DIR = build

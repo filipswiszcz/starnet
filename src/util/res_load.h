@@ -6,9 +6,6 @@
 #include <string.h>
 #include <regex.h>
 
-#define STB_IMAGE_IMPLEMENTATION
-#include <stb/stb_image.h>
-
 #ifdef __APPLE__
     #define GL_SILENCE_DEPRECATION
     #define GLFW_INCLUDE_GLCOREARB
