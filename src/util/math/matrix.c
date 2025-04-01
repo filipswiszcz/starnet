@@ -27,12 +27,11 @@ mat4 perspective(float fovy, float aspect, float znear, float zfar) {
     return res;
 }
 
-mat4 translate(mat4 m, vec3 v) { // res[3][0] += v.x; del [3][3]
+mat4 translate(mat4 m, vec3 v) {
     mat4 res = m;
-    res.m[3][0] = m.m[0][0] * v.x + m.m[1][0] * v.y + m.m[2][0] * v.z + m.m[3][0];
-    res.m[3][1] = m.m[0][1] * v.x + m.m[1][1] * v.y + m.m[2][1] * v.z + m.m[3][1];
-    res.m[3][2] = m.m[0][2] * v.x + m.m[1][2] * v.y + m.m[2][2] * v.z + m.m[3][2];
-    res.m[3][3] = m.m[0][3] * v.x + m.m[1][3] * v.y + m.m[2][3] * v.z + m.m[3][3];
+    res.m[3][0] += v.x;
+    res.m[3][1] += v.y;
+    res.m[3][2] += v.z;
     return res;
 }
 

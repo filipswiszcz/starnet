@@ -11,7 +11,7 @@
 #define WINDOW_WIDTH 800
 #define WINDOW_HEIGHT 600
 
-#define WINDOW_NAME "STARNET (BUILD v0.0.5) - Powered by XYCORP Labs"
+#define WINDOW_NAME "STARNET (BUILD v0.0.7) - Powered by XYCORP Labs"
 
 int IS_FIRST_PLAY = 1;
 
@@ -74,7 +74,7 @@ void keyboard_input() {
         glfwSetWindowShouldClose(context.window, true);
 }
 
-void frames_updater() {
+void frames_updater() { // it can be done better
     float curr_tm = (float) glfwGetTime();
     TIME_BETWEEN_FRAMES = curr_tm - TIME_OF_LAST_FRAME;
     TEMP_FRAMES_HOLDER++;
@@ -118,6 +118,19 @@ int main() {
     uint32_t prog = shlink(vshader, fshader);
     // end of shaders
 
+    // texture
+    uint32_t texture;
+    texture_load(texture, "assets/texture/metal.jpg");
+    // end of texture
+
+    // meshes
+    vec3 positions[256];
+    for (int i = 0; i < 16; i++) {
+        for (int j = 0; j < 16; j++) {
+            positions[i * 16 + j] = vec3(i * 2.0f, 0.0f, j * 2.0f);
+        }
+    }
+
     // TODO
     // render a lot of meshes and later a lot of instances, check performances (does it really fucking works?)
     mesh_t mesh = {0};
@@ -138,12 +151,13 @@ int main() {
 
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*) 0);
     glEnableVertexAttribArray(0);
-    // glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*) (3 * sizeof(float)));
-    // glEnableVertexAttribArray(2);
+    // glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*) (3 * sizeof(float)));
+    // glEnableVertexAttribArray(1);
 
-    // glBindVertexArray(0);
-    // glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
-    // glBindBuffer(GL_ARRAY_BUFFER, 0);
+    // glBindVertexArray(0); // why this?
+    // glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0); // and this?
+    // glBindBuffer(GL_ARRAY_BUFFER, 0); // and and this?
+    // end of meshes
 
     // camera
     context.camera.pos = vec3(0.0f, 1.0f, 3.0f);
@@ -171,6 +185,10 @@ int main() {
         glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+        // texture
+        glActiveTexture(GL_TEXTURE0);
+        glBindTexture(GL_TEXTURE_2D, texture);
+
         glUseProgram(prog);
 
         mat4 projection = perspective(radians(45.0f), (float) WINDOW_WIDTH / (float) WINDOW_HEIGHT, 0.1f, 100.0f);
@@ -178,14 +196,14 @@ int main() {
 
         mat4 view = get_look_at(context.camera.pos, vec3_add(context.camera.pos, context.camera.targpos), context.camera.uppos);
         glUniformMatrix4fv(glGetUniformLocation(prog, "view"), 1, GL_FALSE, &view.m[0][0]);
-        
-        mat4 model = mat4(1.0f);
-        // model = translate(model, positions[1]);
-        glUniformMatrix4fv(glGetUniformLocation(prog, "model"), 1, GL_FALSE, &model.m[0][0]);
 
         glBindVertexArray(vao);
-        // glDrawArrays(GL_TRIANGLES, 0, 36);
-        glDrawElements(GL_TRIANGLES, mesh.indices.k, GL_UNSIGNED_INT, 0);
+        for (int i = 0; i < 256; i++) {
+            mat4 model = mat4(1.0f);
+            model = translate(model, positions[i]);
+            glUniformMatrix4fv(glGetUniformLocation(prog, "model"), 1, GL_FALSE, &model.m[0][0]);
+            glDrawElements(GL_TRIANGLES, mesh.indices.k, GL_UNSIGNED_INT, 0);
+        }
 
         glfwSwapBuffers(context.window);
         glfwPollEvents();
