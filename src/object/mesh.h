@@ -3,8 +3,8 @@
 
 #include <stdint.h>
 
+#include "util/math/quat.h"
 #include "util/dyn_array.h"
-#include "util/vector.h"
 
 typedef struct material material_t;
 
@@ -25,18 +25,26 @@ struct mesh {
     material_t material;
 };
 
-struct {
+typedef struct transformation transformation_t;
+
+struct transformation {
+    uint16_t id;
     vec3 scale;
     vec3 rot_origin;
-    // quat
+    quat rot;
     vec3 translation;
-} transformation;
+};
 
 typedef struct instance instance_t;
 
-struct {
-    uint16_t mesh_id;
-    uint16_t transform_id;
-} instance;
+struct instance {
+    mesh_t *mesh;
+    transformation_t transf;
+};
+
+// struct instance {
+//     uint16_t mesh_id;
+//     uint16_t transform_id;
+// };
 
 #endif /* MESH_H */
