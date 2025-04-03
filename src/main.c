@@ -124,17 +124,21 @@ int main() {
     // end of texture
 
     // meshes
-    vec3 positions[256];
-    for (int i = 0; i < 16; i++) {
-        for (int j = 0; j < 16; j++) {
-            positions[i * 16 + j] = vec3(i * 2.0f, 0.0f, j * 2.0f);
-        }
-    }
 
     // TODO
     // render a lot of meshes and later a lot of instances, check performances (does it really fucking works?)
     mesh_t mesh = {0};
     mesh_load(&mesh, "assets/default/cube.obj");
+
+    transformation_t transf = {0};
+    transf.translation = vec3(0.0f, 0.0f, 0.0f);
+
+    instance_t instance;
+    instance.mesh = &mesh;
+    instance.transf = transf;
+
+    vec3 mercury_orbit = vec3(-10.0f, 0.0f, 0.0f); // del
+    float R = 10.0f, angle = 0.0f; // del
 
     unsigned int vao, vbo, ebo;
     glGenVertexArrays(1, &vao);
@@ -198,13 +202,25 @@ int main() {
         glUniformMatrix4fv(glGetUniformLocation(prog, "view"), 1, GL_FALSE, &view.m[0][0]);
 
         glBindVertexArray(vao);
-        for (int i = 0; i < 2; i++) {
-            mat4 model = mat4(1.0f);
-            model = translate(model, positions[i]); // positions[i];
-            model = rotate(model, 60.0f, vec3(0, 0, 1));
-            glUniformMatrix4fv(glGetUniformLocation(prog, "model"), 1, GL_FALSE, &model.m[0][0]);
-            glDrawElements(GL_TRIANGLES, mesh.indices.k, GL_UNSIGNED_INT, 0);
-        }
+        mat4 sun_model = mat4(1.0f);
+        sun_model = translate(sun_model, instance.transf.translation);
+        sun_model = rotate(sun_model, (float) glfwGetTime() * 10.0f, vec3(1.0f, 0.0f, 0.0f));
+        sun_model = rotate(sun_model, (float) glfwGetTime() * 5.0f, vec3(0.0f, 0.0f, 1.0f));
+        glUniformMatrix4fv(glGetUniformLocation(prog, "model"), 1, GL_FALSE, &sun_model.m[0][0]);
+        glDrawElements(GL_TRIANGLES, mesh.indices.k, GL_UNSIGNED_INT, 0);
+
+        // orbit
+        angle += (M_PI / 180);
+        mercury_orbit.x = sun_model.m[3][0] + R * cos(angle);
+        mercury_orbit.z = sun_model.m[3][2] + R * sin(angle);
+        // end of orbit
+
+        mat4 mercury_model = mat4(1.0f);
+        mercury_model = translate(mercury_model, mercury_orbit);
+        mercury_model = rotate(mercury_model, (float) glfwGetTime() * 10.0f, vec3(1.0f, 0.0f, 0.0f));
+        mercury_model = rotate(mercury_model, (float) glfwGetTime() * 5.0f, vec3(0.0f, 0.0f, 1.0f));
+        glUniformMatrix4fv(glGetUniformLocation(prog, "model"), 1, GL_FALSE, &mercury_model.m[0][0]);
+        glDrawElements(GL_TRIANGLES, mesh.indices.k, GL_UNSIGNED_INT, 0);
 
         glfwSwapBuffers(context.window);
         glfwPollEvents();
