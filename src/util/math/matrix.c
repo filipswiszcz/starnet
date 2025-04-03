@@ -35,6 +35,40 @@ mat4 translate(mat4 m, vec3 v) {
     return res;
 }
 
+mat4 rotate(mat4 m, float angle, vec3 v) {
+    float const a = radians(angle);
+    float const c = cos(a);
+    float const s = sin(a);
+
+    vec3 axis = normalize(v);
+
+    mat4 rot = mat4(0);
+    rot.m[0][0] = c + (1 - c) * axis.x * axis.x;
+    rot.m[0][1] = (1 - c) * axis.x * axis.y - s * axis.z;
+    rot.m[0][2] = (1 - c) * axis.x * axis.z + s * axis.y;
+
+    rot.m[1][0] = (1 - c) * axis.y * axis.x + s * axis.z;
+    rot.m[1][1] = c + (1 - c) * axis.y * axis.y;
+    rot.m[1][2] = (1 - c) * axis.y * axis.z - s * axis.x;
+
+    rot.m[2][0] = (1 - c) * axis.z * axis.x - s * axis.y;
+    rot.m[2][1] = (1 - c) * axis.z * axis.y + s * axis.x;
+    rot.m[2][2] = c + (1 - c) * axis.z * axis.z;
+
+    rot.m[3][3] = 1.0f;
+
+    mat4 res = mat4(0);
+    for (int i = 0; i < 4; i++) {
+        for (int j = 0; j < 4; j++) {
+            res.m[i][j] = 0;
+            for (int k = 0; k < 4; k++)
+                res.m[i][j] += m.m[i][k] * rot.m[k][j];
+        }
+    }
+
+    return res;
+}
+
 mat4 get_look_at(vec3 pos, vec3 targpos, vec3 uppos) {
     const vec3 t = normalize(vec3_sub(targpos, pos));
     const vec3 r = normalize(cross(t, uppos));

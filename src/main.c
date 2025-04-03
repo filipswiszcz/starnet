@@ -136,18 +136,6 @@ int main() {
     mesh_t mesh = {0};
     mesh_load(&mesh, "assets/default/cube.obj");
 
-    transformation_t transf = {0};
-    transf.translation = vec3(0.0f, 0.0f, 0.0f);
-
-    instance_t instances[16];
-    for (int i = 0; i < 16; i++) {
-        instance_t instance = {0};
-        instance.mesh = &mesh;
-        transf.translation.x += i;
-        instance.transf = transf;
-        instances[i] = instance;
-    }
-
     unsigned int vao, vbo, ebo;
     glGenVertexArrays(1, &vao);
     glGenBuffers(1, &vbo);
@@ -210,9 +198,10 @@ int main() {
         glUniformMatrix4fv(glGetUniformLocation(prog, "view"), 1, GL_FALSE, &view.m[0][0]);
 
         glBindVertexArray(vao);
-        for (int i = 0; i < 16; i++) {
+        for (int i = 0; i < 2; i++) {
             mat4 model = mat4(1.0f);
-            model = translate(model, instances[i].transf.translation);
+            model = translate(model, positions[i]); // positions[i];
+            model = rotate(model, 60.0f, vec3(0, 0, 1));
             glUniformMatrix4fv(glGetUniformLocation(prog, "model"), 1, GL_FALSE, &model.m[0][0]);
             glDrawElements(GL_TRIANGLES, mesh.indices.k, GL_UNSIGNED_INT, 0);
         }

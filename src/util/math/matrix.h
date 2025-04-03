@@ -22,6 +22,8 @@ mat4 perspective(float fovy, float aspect, float znear, float zfar);
 
 mat4 translate(mat4 m, vec3 v);
 
+mat4 rotate(mat4 m, float angle, vec3 v);
+
 mat4 get_look_at(vec3 pos, vec3 targpos, vec3 uppos);
 
 #endif /* MATRIX_H */
