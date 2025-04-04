@@ -15,6 +15,9 @@
 
 int IS_FIRST_PLAY = 1;
 
+float TIME_OF_LAST_FRAME_V2 = 0.0f;
+int FRAMES_PER_SECOND_V2 = 0;
+
 float TIME_OF_LAST_FRAME = 0.0f;
 float TIME_BETWEEN_FRAMES = 0.0f;
 float FRAMES_PER_SECOND = 0.0f;
@@ -72,6 +75,20 @@ void keyboard_input() {
         context.camera.speed = 2.0f;
     if (glfwGetKey(context.window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
         glfwSetWindowShouldClose(context.window, true);
+}
+
+void frames_updater_v2() {
+    float curr_tm = (float) glfwGetTime();
+    FRAMES_PER_SECOND_V2++;
+    if (curr_tm - TIME_OF_LAST_FRAME_V2 >= 1.0) {
+        char fps_title[16], full_title[64];
+        strcpy(full_title, WINDOW_NAME);
+        sprintf(fps_title, " [%d FPS]", (int) FRAMES_PER_SECOND_V2);
+        strcat(full_title, fps_title);
+        glfwSetWindowTitle(context.window, full_title);
+        FRAMES_PER_SECOND_V2 = 0;
+        TIME_OF_LAST_FRAME_V2 += 1.0f;
+    }
 }
 
 void frames_updater() { // it can be done better
@@ -179,7 +196,8 @@ int main() {
         CAMERA_TIME_OF_LAST_FRAME = curr_frame_tm;
 
         // frames
-        frames_updater();
+        // frames_updater();
+        frames_updater_v2();
 
         // inputs
         keyboard_input();
