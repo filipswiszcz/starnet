@@ -133,6 +133,15 @@ int main() {
     uint32_t fshader = shcompile(GL_FRAGMENT_SHADER, fshcode);
 
     uint32_t prog = shlink(vshader, fshader);
+
+    char *lvshcode, *lfshcode;
+    shread("shader/light.vs", &lvshcode);
+    shread("shader/light.fs", &lfshcode);
+
+    uint32_t lvshader = shcompile(GL_VERTEX_SHADER, lvshcode);
+    uint32_t lfshader = shcompile(GL_FRAGMENT_SHADER, lfshcode);
+
+    uint32_t lprog = shlink(lvshader, lfshader);
     // end of shaders
 
     // texture
@@ -178,6 +187,14 @@ int main() {
     // glBindVertexArray(0); // why this?
     // glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0); // and this?
     // glBindBuffer(GL_ARRAY_BUFFER, 0); // and and this?
+
+    unsigned int sun_vao;
+    glGenVertexArrays(1, &sun_vao);
+    glBindVertexArray(sun_vao);
+
+    glBindBuffer(GL_ARRAY_BUFFER, vbo);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*) 0);
+    glEnableVertexAttribArray(0);
     // end of meshes
 
     // camera
@@ -213,6 +230,11 @@ int main() {
 
         glUseProgram(prog);
 
+        glUniform3f(glGetUniformLocation(prog, "object_color"), 1.0f, 0.5f, 0.33f);
+        glUniform3f(glGetUniformLocation(prog, "light_color"), 1.0f, 1.0f, 1.0f);
+        glUniform3f(glGetUniformLocation(prog, "light_pos"), 5.0f, 0.0f, 5.0f);
+        glUniform3f(glGetUniformLocation(prog, "view_pos"), context.camera.pos.x, context.camera.pos.y, context.camera.pos.z);
+
         mat4 projection = perspective(radians(45.0f), (float) WINDOW_WIDTH / (float) WINDOW_HEIGHT, 0.1f, 100.0f);
         glUniformMatrix4fv(glGetUniformLocation(prog, "projection"), 1, GL_FALSE, &projection.m[0][0]);
 
@@ -239,6 +261,16 @@ int main() {
         mercury_model = rotate(mercury_model, (float) glfwGetTime() * 5.0f, vec3(0.0f, 0.0f, 1.0f));
         glUniformMatrix4fv(glGetUniformLocation(prog, "model"), 1, GL_FALSE, &mercury_model.m[0][0]);
         glDrawElements(GL_TRIANGLES, mesh.indices.k, GL_UNSIGNED_INT, 0);
+
+        // light
+        glUseProgram(lprog);
+        glUniformMatrix4fv(glGetUniformLocation(lprog, "projection"), 1, GL_FALSE, &projection.m[0][0]);
+        glUniformMatrix4fv(glGetUniformLocation(lprog, "view"), 1, GL_FALSE, &view.m[0][0]);
+        mat4 light_model = mat4(1.0f);
+        light_model = translate(light_model, vec3(5.0f, 0.0f, 5.0f));
+        glUniformMatrix4fv(glGetUniformLocation(lprog, "model"), 1, GL_FALSE, &light_model.m[0][0]);
+        glDrawElements(GL_TRIANGLES, mesh.indices.k, GL_UNSIGNED_INT, 0);
+        // end of light
 
         glfwSwapBuffers(context.window);
         glfwPollEvents();
