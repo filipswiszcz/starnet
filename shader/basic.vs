@@ -1,18 +1,20 @@
 #version 410 core
 
 layout (location = 0) in vec3 vertices;
-// layout (location = 1) in vec2 textures;
-// layout (location = 2) in vec3 colors;
+layout (location = 1) in vec3 normals;
 
-// out vec2 modif_textures;
-// out vec3 modif_colors;
+out vec3 modif_vertices;
+out vec3 modif_normals;
 
 uniform mat4 model;
 uniform mat4 view;
 uniform mat4 projection;
 
 void main() {
-    gl_Position = projection * view * model * vec4(vertices.x, vertices.y, vertices.z, 1.0f);
-    // modif_textures = vec2(textures.x, 1.0f - textures.y);
-    // modif_colors = colors;
+    modif_vertices = vec3(model * vec4(vertices, 1.0f));
+    modif_normals = normals;
+    // modif_normals = mat3(transpose(inverse(model))) * normals;
+    gl_Position = projection * view * vec4(modif_vertices, 1.0f);
+
+    // gl_Position = projection * view * model * vec4(vertices.x, vertices.y, vertices.z, 1.0f);
 }
