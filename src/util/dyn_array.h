@@ -3,18 +3,29 @@
 
 #include <stdlib.h>
 
-#include "object/mesh.h"
+#include "util/common.h"
 
-typedef struct varray varray_t;
-typedef struct farray farray_t;
-typedef struct iarray iarray_t;
-typedef struct carray carray_t;
+typedef struct hash_entry hash_entry_t;
 
-struct varray {
-    vertex_t *values;
+struct hash_entry {
+    char *key;
+    vertex_t value;
+    hash_entry_t *next;
+};
+
+typedef struct hash_table hash_table_t;
+
+struct hash_table {
+    hash_entry_t **entries;
     size_t k;
     size_t capacity;
 };
+
+void hash_table_add(hash_table_t *tab, char *key, vertex_t val);
+
+typedef struct farray farray_t;
+typedef struct iarray iarray_t;
+typedef struct carray carray_t;
 
 struct farray {
     float *values;
@@ -33,8 +44,6 @@ struct carray {
     size_t k;
     size_t capacity;
 };
-
-void varray_add(varray_t *arr, vertex_t val);
 
 void farray_add(farray_t *arr, float val);
 
