@@ -2,6 +2,7 @@
 #define __R_MATH_H__
 
 #include <math.h>
+#include <stdio.h>
 
 // vec2
 #define vec2(x, y) ((vec2_t) {x, y})
@@ -39,11 +40,8 @@ vec3_t r_cross(const vec3_t a, const vec3_t b);
 
 float r_dot(const vec3_t a, const vec3_t b);
 
-// quat
-typedef vec4_t quat_t;
-
 // mat4
-#define mat4(v) ((mat4) {.m = { \
+#define mat4(v) ((mat4_t) {.m = { \
     {v, 0, 0, 0}, \
     {0, v, 0, 0}, \
     {0, 0, v, 0}, \
@@ -55,5 +53,18 @@ typedef struct {
 } mat4_t;
 
 void __r_mat4_read(mat4_t m);
+
+mat4_t r_perspective(float fovy, float aspect, float znear, float zfar);
+
+mat4_t r_translate(mat4_t m, vec3_t v);
+
+mat4_t r_rotate(mat4_t m, float angle, vec3_t v);
+
+mat4_t r_look_at(vec3_t pos, vec3_t target, vec3_t up);
+
+// quat
+typedef vec4_t quat_t;
+
+mat4_t r_rotate_quat(mat4_t m, quat_t q);
 
 #endif // !__R_MATH_H__
