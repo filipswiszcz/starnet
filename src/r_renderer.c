@@ -24,6 +24,7 @@ void r_mesh_load(mesh_t *mesh, char *filepath) {
             vertex.uv = uv;
         } else if (strncmp(line, "f", 1) == 0) {
             // load indices
+            _r_mesh_load_indices(&mesh -> indices, line);
         } else if (strncmp(line, "mtllib", 6) == 0) {
             char prepath[256], path[128];
             sscanf(line, "mtllib %s", path);
@@ -36,4 +37,21 @@ void r_mesh_load(mesh_t *mesh, char *filepath) {
     }
     
     fclose(file);
+}
+
+void _r_mesh_load_indices(uint32_array_t *array, char line[64]) {
+    int gate = 0, offset = 0;
+    for (int i = 0; i < 64; i++) {
+        if (line[i] == ' ') gate = 1;
+        else if (line[i] == '/' && gate == 1) {
+            int size = (i + offset) - i;
+            char *sub = (char*) malloc(size + 1);
+            strncpy(sub, &line[i - offset], size);
+            sub[size] = '\0';
+            uint32_t value = strtoul(sub, NULL, 0);
+            d_uint32_array_insert(array, value - 1);
+            free(sub);
+            gate = 0; offset = 0;
+        } else if (gate == 1) offset += 1;
+    }
 }
