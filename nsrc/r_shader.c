@@ -57,10 +57,10 @@ void r_create_program(shader_t *shader, char *frag_path, char *vert_path) {
 #endif
 }
 
-void r_set_vec3(shader_t *shader, char *name, vec3 vec) {
+void r_set_vec3(shader_t *shader, char *name, vec3_t vec) {
     glUniform3f(glGetUniformLocation(shader -> program, name), vec.x, vec.y, vec.z);
 }
 
-void r_set_mat4(shader_t *shader, char *name, mat4 mat) {
+void r_set_mat4(shader_t *shader, char *name, mat4_t mat) {
     glUniformMatrix4fv(glGetUniformLocation(shader -> program, name), 1, GL_FALSE, &mat.m[0][0]);
 }

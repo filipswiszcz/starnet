@@ -1,4 +1,5 @@
 #include "d_array.h"
+#include "r_renderer.h"
 
 // float dynamic array
 
