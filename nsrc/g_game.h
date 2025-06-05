@@ -40,6 +40,10 @@ static struct {
                     // draw
 } context;
 
+void g_game_init();
+
 void g_gameloop();
+
+void g_game_stop();
 
 #endif // !__G_GAME_H__
