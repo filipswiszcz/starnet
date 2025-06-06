@@ -4,7 +4,24 @@
 #define WINDOW_WIDTH 800
 #define WINDOW_HEIGHT 600
 
-#define WINDOW_NAME "SOLAR (Build v0.0.8) - Powered by XYCINDA Labs"
+#define WINDOW_NAME "SOLAR (Build v0.0.8)"
+
+float TIME_OF_LAST_FRAME = 0.0f;
+int FRAMES_PER_SECOND = 0;
+
+void g_game_frames() {
+    float current_time = (float) glfwGetTime();
+    FRAMES_PER_SECOND++;
+    if (current_time - TIME_OF_LAST_FRAME >= 1.0) {
+        char subtitle[16], title[64];
+        strcpy(title, WINDOW_NAME);
+        sprintf(subtitle, " [%d FPS]", (int) FRAMES_PER_SECOND);
+        strcat(title, subtitle);
+        glfwSetWindowTitle(context.window, title);
+        FRAMES_PER_SECOND = 0;
+        TIME_OF_LAST_FRAME = 1.0f;
+    }
+}
 
 void g_game_init() {
     ASSERT(glfwInit(), "Failed to initialize OpenGL");
@@ -26,13 +43,16 @@ void g_game_init() {
     //..
 }
 
-void g_gameloop() {
+void g_game_loop() {
     while (!glfwWindowShouldClose(context.window)) {
-        
+        // frames updater
+        g_game_frames();
+
         glfwSwapBuffers(context.window);
         glfwPollEvents();
     }
-
 }
 
-void g_game_stop() {}
+void g_game_stop() {
+    glfwTerminate();
+}

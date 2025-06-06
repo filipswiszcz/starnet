@@ -1,12 +1,15 @@
 #ifndef __G_GAME_H__
 #define __G_GAME_H__
 
+#include <string.h>
+
 #ifdef __APPLE__
     #define GL_SILENCE_DEPRECATION
     #define GLFW_INCLUDE_GLCOREARB
 #endif
 #include <GLFW/glfw3.h>
 
+#include "d_util.h"
 #include "r_math.h"
 
 // xycida
@@ -42,7 +45,7 @@ static struct {
 
 void g_game_init();
 
-void g_gameloop();
+void g_game_loop();
 
 void g_game_stop();
 
