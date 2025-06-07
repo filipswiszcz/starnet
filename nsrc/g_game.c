@@ -6,6 +6,10 @@
 
 #define WINDOW_NAME "SOLAR (Build v0.0.8)"
 
+void g_mouse_input() {}
+
+void g_keyboard_input() {}
+
 float TIME_OF_LAST_FRAME = 0.0f;
 int FRAMES_PER_SECOND = 0;
 
@@ -38,6 +42,7 @@ void g_game_init() {
     glfwSetInputMode(context.window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 
     glEnable(GL_DEPTH_TEST);
+    glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
     // glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 
     //..
@@ -45,8 +50,13 @@ void g_game_init() {
 
 void g_game_loop() {
     while (!glfwWindowShouldClose(context.window)) {
+        // inputs
+
         // frames updater
         g_game_frames();
+
+        // background
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
         glfwSwapBuffers(context.window);
         glfwPollEvents();
