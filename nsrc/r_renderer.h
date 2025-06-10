@@ -6,6 +6,7 @@
 #include <string.h>
 
 #include "d_array.h"
+#include "d_util.h"
 #include "r_math.h"
 
 #define ASSETS_DIR_PATH "assets/"

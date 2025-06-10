@@ -19,10 +19,38 @@ static void r_mesh_load_indices(uint32_array_t *array, char line[64]) {
     }
 }
 
+void r_mesh_load_material(material_t material, char *filepath) {
+    FILE *file = fopen(filepath, "r");
+
+    ASSERT(file != NULL, "Failed to open the file: %s\n", filepath);
+
+    char line[64];
+    while (fgets(line, sizeof(line), file)) {
+        if (strncmp(line, "Ns", 2) == 0) {
+            sscanf(line, "Ns %f", &material.shininess);
+        } else if (strncmp(line, "Ka", 2) == 0) {
+            sscanf(line, "Ka %f %f %f", &material.ambient.x, &material.ambient.y, &material.ambient.z);
+        } else if (strncmp(line, "Kd", 2) == 0) {
+            sscanf(line, "Kd %f %f %f", &material.diffuse.x, &material.diffuse.y, &material.diffuse.z);
+        } else if (strncmp(line, "Ks", 2) == 0) {
+            sscanf(line, "Ks %f %f %f", &material.specular.x, &material.specular.y, &material.specular.z);
+        } else if (strncmp(line, "Ke", 2) == 0) {
+            sscanf(line, "Ke %f %f %f", &material.emissibity.x, &material.emissibity.y, &material.emissibity.z);
+        } else if (strncmp(line, "Ni", 2) == 0) {
+            sscanf(line, "Ni %f", &material.density);
+        } else if (strncmp(line, "d", 1) == 0) {
+            sscanf(line, "d %f", &material.transparency);
+        } else if (strncmp(line, "illum", 5) == 0) {
+            sscanf(line, "illum %d", &material.illumination);
+        }
+    }
+    fclose(file);
+}
+
 void r_mesh_load(mesh_t *mesh, char *filepath) {
     FILE *file = fopen(filepath, "r");
 
-    // assert
+    ASSERT(file != NULL, "Failed to open the file: %s\n", filepath);
 
     char line[64];
     while (fgets(line, sizeof(line), file)) {
@@ -55,20 +83,3 @@ void r_mesh_load(mesh_t *mesh, char *filepath) {
     
     fclose(file);
 }
-
-/*static void r_mesh_load_indices(uint32_array_t *array, char line[64]) {
-    int gate = 0, offset = 0;
-    for (int i = 0; i < 64; i++) {
-        if (line[i] == ' ') gate = 1;
-        else if (line[i] == '/' && gate == 1) {
-            int size = (i + offset) - i;
-            char *sub = (char*) malloc(size + 1);
-            strncpy(sub, &line[i - offset], size);
-            sub[size] = '\0';
-            uint32_t value = strtoul(sub, NULL, 0);
-            d_uint32_array_insert(array, value - 1);
-            free(sub);
-            gate = 0; offset = 0;
-        } else if (gate == 1) offset += 1;
-    }
-}*/

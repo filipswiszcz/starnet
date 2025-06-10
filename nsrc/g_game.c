@@ -57,11 +57,11 @@ void g_keyboard_input() {
     if (glfwGetKey(context.window, GLFW_KEY_D) == GLFW_PRESS)
         context.camera.position = vec3_add(context.camera.position, vec3_mul(r_normalize(r_cross(context.camera.target_position, context.camera.head_position)), (context.camera.speed * CAMERA_TIME_BETWEEN_FRAMES)));
     if (glfwGetKey(context.window, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS)
-        context.camera.speed = 8i.0f;
+        context.camera.speed = 8.0f;
     if (glfwGetKey(context.window, GLFW_KEY_LEFT_SHIFT) == GLFW_RELEASE)
         context.camera.speed = 2.0f;
     if (glfwGetKey(context.window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
-        glfwSetWindowShouldClose(context.window, true);
+        glfwSetWindowShouldClose(context.window, 1);
 }
 
 // FRAMES
