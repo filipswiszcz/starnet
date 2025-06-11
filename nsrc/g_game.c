@@ -1,5 +1,6 @@
 #include "d_util.h"
 #include "g_game.h"
+#include "r_renderer.h"
 
 #define WINDOW_WIDTH 800
 #define WINDOW_HEIGHT 600
@@ -102,6 +103,9 @@ void g_game_init() {
     glEnable(GL_DEPTH_TEST);
     glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
     // glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+
+    mesh_t mesh;
+    r_mesh_load(&mesh, "assets/default/cube.obj");
 
     //..
 }

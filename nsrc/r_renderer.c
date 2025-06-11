@@ -1,6 +1,6 @@
 #include "r_renderer.h"
 
-// mesh
+// MESH
 
 static void r_mesh_load_indices(uint32_array_t *array, char line[64]) {
     int gate = 0, offset = 0;
@@ -12,7 +12,7 @@ static void r_mesh_load_indices(uint32_array_t *array, char line[64]) {
             strncpy(sub, &line[i - offset], size);
             sub[size] = '\0';
             uint32_t value = strtoul(sub, NULL, 0);
-            d_uint32_array_insert(array, value - 1);
+            // d_uint32_array_insert(array, value - 1);
             free(sub);
             gate = 0; offset = 0;
         } else if (gate == 1) offset = 1;
@@ -68,17 +68,16 @@ void r_mesh_load(mesh_t *mesh, char *filepath) {
             sscanf(line, "vt %f %f", &uv.x, &uv.y);
             vertex.uv = uv;
         } else if (strncmp(line, "f", 1) == 0) {
-            // load indices
             r_mesh_load_indices(&mesh -> indices, line);
         } else if (strncmp(line, "mtllib", 6) == 0) {
             char prepath[256], path[128];
             sscanf(line, "mtllib %s", path);
-            // mesh -> material.name = path;
+            mesh -> material.name = path;
             strcpy(prepath, ASSETS_DEFAULT_DIR_PATH);
             strcat(prepath, path);
-            // load material
+            r_mesh_load_material(mesh -> material, prepath);
         }
-        d_vertex_array_insert(&mesh -> vertices, vertex);
+        // d_vertex_array_insert(&mesh -> vertices, vertex);
     }
     
     fclose(file);
