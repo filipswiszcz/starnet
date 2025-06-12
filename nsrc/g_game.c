@@ -104,7 +104,7 @@ void g_game_init() {
     glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
     // glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 
-    mesh_t mesh;
+    mesh_t mesh = {0};
     r_mesh_load(&mesh, "assets/default/cube.obj");
 
     //..
