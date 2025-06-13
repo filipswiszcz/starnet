@@ -3,6 +3,8 @@
 
 #include <stdlib.h>
 
+// BASE
+
 typedef struct float_array {
     float *values;
     size_t size, capacity;
@@ -17,6 +19,8 @@ typedef struct uint32_array {
 
 void d_uint32_array_insert(uint32_array_t *array, uint32_t value);
 
+// MESH
+
 typedef struct vertex vertex_t;
 
 typedef struct vertex_array {
@@ -25,5 +29,14 @@ typedef struct vertex_array {
 } vertex_array_t;
 
 void d_vertex_array_insert(vertex_array_t *array, vertex_t value);
+
+// SCENE
+
+typedef struct instance_array {
+    instance_t *values;
+    size_t size, capacity;
+} instance_array_t;
+
+void d_instance_array_insert(instance_array_t *array, instance_t instance);
 
 #endif // !__D_ARRAY_H__
